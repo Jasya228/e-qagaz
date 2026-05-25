@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: eqagaz_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-eqagaz_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: eqagaz_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-eqagaz_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-super-secret-production-key}
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      - db
+    # In production, we don't map ports directly, Nginx handles it. But for local testing:
+    expose:
+      - "4000"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: eqagaz_frontend
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: /api
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: eqagaz_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  pgdata:
+  backend_uploads:

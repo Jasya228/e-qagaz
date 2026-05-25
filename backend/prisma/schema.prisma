@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  HEAD_DEPARTMENT
+  ADMIN
+}
+
+enum AchievementStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AchievementCategory {
+  OLYMPIAD
+  SPORT
+  SCIENCE
+  COMMUNITY
+  OTHER
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  patronymic   String?
+  phone        String?
+  avatarUrl    String?
+  dateOfBirth  DateTime?
+  gender       String?
+  role         Role     @default(STUDENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studentProfile Student?
+  refreshTokens  RefreshToken[]
+  logs           Log[]
+  comments       Comment[]
+  notifications  Notification[]
+  managedDepartments Department[] @relation("DepartmentHead")
+  verifiedAchievements Achievement[] @relation("AchievementVerifier")
+
+  @@index([email])
+  @@index([role, isActive])
+}
+
+model Student {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @db.Uuid
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId    String   @db.Uuid
+  department      Department @relation(fields: [departmentId], references: [id])
+  studentIdNumber String   @unique
+  courseYear      Int
+  groupName       String
+  curatorName     String?
+
+  grades          Grade[]
+  achievements    Achievement[]
+  files           File[]
+
+  @@index([departmentId])
+  @@index([courseYear, groupName])
+}
+
+model Department {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String   @unique
+  code       String   @unique
+  headUserId String?  @unique @db.Uuid
+  headUser   User?    @relation("DepartmentHead", fields: [headUserId], references: [id])
+
+  students   Student[]
+  subjects   Subject[]
+}
+
+model Subject {
+  id           String   @id @default(uuid()) @db.Uuid
+  departmentId String   @db.Uuid
+  department   Department @relation(fields: [departmentId], references: [id])
+  name         String
+  description  String?
+  credits      Int
+  courseYear   Int      @default(1)
+  semester     Int      @default(1)
+
+  grades       Grade[]
+}
+
+model Grade {
+  id         String   @id @default(uuid()) @db.Uuid
+  studentId  String   @db.Uuid
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId  String   @db.Uuid
+  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  score      Int
+  semester   String
+  awardedAt  DateTime @default(now())
+
+  @@index([studentId])
+  @@index([subjectId])
+}
+
+model Achievement {
+  id          String              @id @default(uuid()) @db.Uuid
+  studentId   String              @db.Uuid
+  student     Student             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    AchievementCategory
+  status      AchievementStatus   @default(PENDING)
+  verifiedById String?            @db.Uuid
+  verifier    User?               @relation("AchievementVerifier", fields: [verifiedById], references: [id])
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  files       File[]
+  comments    Comment[]
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model File {
+  id            String   @id @default(uuid()) @db.Uuid
+  uploaderId    String   @db.Uuid
+  uploader      Student  @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  achievementId String?  @db.Uuid
+  achievement   Achievement? @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  fileUrl       String
+  fileType      String
+  size          Int
+  entityType    String   // 'ACHIEVEMENT', 'AVATAR', 'DOCUMENT'
+  createdAt     DateTime @default(now())
+}
+
+model Comment {
+  id            String   @id @default(uuid()) @db.Uuid
+  authorId      String   @db.Uuid
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  achievementId String   @db.Uuid
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  content       String
+  createdAt     DateTime @default(now())
+}
+
+model Log {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   Json
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
