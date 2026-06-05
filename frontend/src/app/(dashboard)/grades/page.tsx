@@ -151,8 +151,11 @@ export default function GradesPage() {
                       ))
                     ) : grades.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
-                          Оценок не найдено.
+                        <td colSpan={10} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-4 animate-in fade-in zoom-in duration-500">
+                            <img src="https://http.cat/204" alt="No Content Cat" className="w-64 rounded-xl shadow-xl shadow-purple-500/20 border border-white/10 hover:scale-105 transition-transform" />
+                            <p className="text-xl font-bold text-gray-400">Оценок пока нет. Спи спокойно, бро...</p>
+                          </div>
                         </td>
                       </tr>
                     ) : (

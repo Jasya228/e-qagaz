@@ -184,9 +184,11 @@ export default function AchievementsPage() {
           {[1, 2, 3].map(i => <div key={i} className="h-64 bg-white/5 animate-pulse rounded-2xl border border-white/10" />)}
         </div>
       ) : achievements.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-gray-500 glass-card">
-          <AwardIcon className="h-12 w-12 mb-4 opacity-50" />
-          <p>{isStudent ? 'Вы еще не добавили ни одного достижения' : 'Нет новых достижений для проверки'}</p>
+        <div className="flex flex-col items-center justify-center py-12 text-gray-500 glass-card animate-in fade-in zoom-in duration-500">
+          <img src="https://http.cat/404" alt="Where are the achievements?" className="w-64 rounded-xl shadow-xl shadow-blue-500/20 border border-white/10 mb-6 hover:scale-105 transition-transform" />
+          <p className="text-xl font-bold text-gray-300">
+            {isStudent ? 'Где твои достижения, Лебовски? Пока тут пусто.' : 'Достижений на проверку нет. Можно отдыхать!'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

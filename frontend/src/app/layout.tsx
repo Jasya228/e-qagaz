@@ -19,9 +19,10 @@ export default function RootLayout({
     <html lang="ru" className="dark">
       <body className={inter.className}>
         <div className="relative min-h-screen flex flex-col">
-          {/* Global Background Glow */}
-          <div className="absolute top-0 -left-40 w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
-          <div className="absolute top-0 -right-40 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+          {/* Global Background Glow - Matching Login Page Design */}
+          <div className="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse pointer-events-none" />
+          <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+          <div className="fixed top-[20%] right-[20%] w-[20vw] h-[20vw] bg-emerald-500/10 rounded-full blur-[100px] mix-blend-screen animate-pulse pointer-events-none" style={{ animationDelay: '4s' }} />
           
           <main className="flex-grow z-10">
             {children}
