@@ -238,8 +238,7 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
-
-      <GlobalAICopilot />
+      {user.role !== 'ADMIN' && <GlobalAICopilot />}
     </div>
   );
 }

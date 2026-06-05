@@ -81,23 +81,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="mt-12 flex justify-center pb-8">
-        <button 
-          onClick={() => {
-            toast('Скоро будет доступно', {
-              description: 'Голосовой помощник (ГС) находится в разработке.',
-              icon: '🎙️',
-            });
-          }}
-          className="relative inline-flex items-center justify-center px-12 py-4 font-bold text-white transition-all duration-300 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:scale-105 active:scale-95 group"
-        >
-          <span className="absolute inset-0 w-full h-full rounded-full opacity-0 group-hover:opacity-20 bg-white blur-sm transition-opacity duration-300"></span>
-          <span className="flex items-center gap-3 relative z-10 text-lg tracking-wider">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-            ГС
-          </span>
-        </button>
-      </div>
     </div>
   );
 }

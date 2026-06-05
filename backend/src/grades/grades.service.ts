@@ -90,6 +90,8 @@ export class GradesService {
         totalPages: Math.ceil(total / limit),
       }
     };
+  }
+
   async update(id: string, score: number) {
     try {
       return await this.prisma.grade.update({

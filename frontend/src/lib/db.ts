@@ -57,10 +57,10 @@ const DEFAULT_DB = {
       nationality: "Казах",
       birthPlace: "Узбекистан, г. Ташкент",
       actualAddress: "Г. Алматы, Ауэзовский район, мкр. Достык, Аймусин 13",
-      familyStatus": "Полная (2)",
+      familyStatus: "Полная (2)",
       phoneNumber: "+7 (777) 123-45-67",
       hobbies: "Футбол, мобилография ",
-      curatorName": "Сейсекулова Сауле"
+      curatorName: "Сейсекулова Сауле"
     }
   ],
   departments: [
