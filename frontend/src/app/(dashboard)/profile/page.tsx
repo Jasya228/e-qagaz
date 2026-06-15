@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { User, Phone, Mail, Calendar, Users, Building, ShieldCheck } from 'lucide-react';
+import { User, Phone, Mail, Calendar, Users, Building, ShieldCheck, Camera } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Profile {
   id: string;
@@ -38,6 +39,33 @@ export default function ProfilePage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      toast.loading('Загрузка фото...', { id: 'upload' });
+      const uploadRes = await fetch('/api/uploads', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error('Ошибка загрузки');
+      const uploadData = await uploadRes.json();
+      const newAvatarUrl = uploadData.url;
+
+      await api.patch('/students/me', { avatarUrl: newAvatarUrl });
+      
+      setProfile(prev => prev ? { ...prev, avatarUrl: newAvatarUrl } : null);
+      toast.success('Фото обновлено', { id: 'upload' });
+    } catch (err) {
+      toast.error('Не удалось обновить фото', { id: 'upload' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -66,19 +94,27 @@ export default function ProfilePage() {
       </div>
 
       {/* Header Card */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 flex items-center gap-8">
-        <div className="h-32 w-32 rounded-full bg-accent/20 flex flex-shrink-0 items-center justify-center text-4xl text-accent font-bold border-2 border-accent/30 overflow-hidden">
-          {profile.avatarUrl ? (
-            <img src={profile.avatarUrl} alt="Аватар" className="h-full w-full object-cover" />
-          ) : (
-            `${profile.firstName[0]}${profile.lastName[0]}`
-          )}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 flex flex-col md:flex-row items-center gap-8">
+        <div className="relative group flex-shrink-0">
+          <div className="w-[120px] h-[160px] rounded-xl bg-accent/20 flex items-center justify-center text-4xl text-accent font-bold border-2 border-accent/30 overflow-hidden relative">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} alt="Аватар" className="h-full w-full object-cover" />
+            ) : (
+              `${profile.firstName[0]}${profile.lastName[0]}`
+            )}
+            
+            {/* Hover overlay for upload */}
+            <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+              <Camera className="h-8 w-8 text-white" />
+              <input type="file" accept="image/*" className="hidden" onChange={handleUploadPhoto} />
+            </label>
+          </div>
         </div>
-        <div>
+        <div className="text-center md:text-left">
           <h1 className="text-3xl font-bold text-white mb-2">
             {profile.lastName} {profile.firstName} {profile.patronymic}
           </h1>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+          <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-400">
             <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> ID: {profile.studentIdNumber}</span>
             <span className="flex items-center gap-1"><Building className="h-4 w-4" /> {profile.department}</span>
             <span className="flex items-center gap-1"><Users className="h-4 w-4" /> Группа {profile.groupName}</span>

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { readDB } from '@/lib/db';
+import { readDB, writeDB } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
 
 export async function GET(request: NextRequest) {
@@ -39,4 +39,22 @@ export async function GET(request: NextRequest) {
     familyStatus: studentData.familyStatus || '',
     hobbies: studentData.hobbies || ''
   });
+}
+
+export async function PATCH(request: NextRequest) {
+  const user = getUserFromRequest(request);
+  if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+
+  const data = await request.json();
+  const db = await readDB();
+
+  const userIndex = db.users.findIndex((u: any) => u.id === user.sub);
+  if (userIndex === -1) return NextResponse.json({ message: 'User not found' }, { status: 404 });
+
+  if (data.avatarUrl !== undefined) {
+    db.users[userIndex].avatarUrl = data.avatarUrl;
+  }
+
+  await writeDB(db);
+  return NextResponse.json({ message: 'Profile updated successfully', avatarUrl: data.avatarUrl });
 }

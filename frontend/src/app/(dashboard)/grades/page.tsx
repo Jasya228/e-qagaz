@@ -230,18 +230,26 @@ export default function GradesPage() {
               <h3 className="text-xl font-bold text-white mb-6">Выберите семестр</h3>
               
               <div className="space-y-3">
-                <button
-                  onClick={() => handleSemesterSelect(1)}
-                  className="w-full glass-button py-4 px-4 rounded-xl text-left text-white font-medium group hover:pl-6 transition-all"
-                >
-                  <span className="text-accent mr-2">I</span> Семестр
-                </button>
-                <button
-                  onClick={() => handleSemesterSelect(2)}
-                  className="w-full glass-button py-4 px-4 rounded-xl text-left text-white font-medium group hover:pl-6 transition-all"
-                >
-                  <span className="text-accent mr-2">II</span> Семестр
-                </button>
+                {(() => {
+                  const s1 = (selectedCourse || 1) * 2 - 1;
+                  const s2 = (selectedCourse || 1) * 2;
+                  return (
+                    <>
+                      <button
+                        onClick={() => handleSemesterSelect(s1)}
+                        className="w-full glass-button py-4 px-4 rounded-xl text-left text-white font-medium group hover:pl-6 transition-all"
+                      >
+                        <span className="text-accent font-bold text-lg mr-2">{s1}</span> Семестр
+                      </button>
+                      <button
+                        onClick={() => handleSemesterSelect(s2)}
+                        className="w-full glass-button py-4 px-4 rounded-xl text-left text-white font-medium group hover:pl-6 transition-all"
+                      >
+                        <span className="text-accent font-bold text-lg mr-2">{s2}</span> Семестр
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </motion.div>
           </div>
