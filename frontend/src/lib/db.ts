@@ -63,6 +63,7 @@ const DEFAULT_DB = {
       curatorName: "Сейсекулова Сауле"
     }
   ],
+  teachers: [],
   departments: [
     {
       id: "departments-1779729047400",

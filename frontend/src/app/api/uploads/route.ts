@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth-server';
+import { readDB, writeDB } from '@/lib/db';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -32,6 +33,20 @@ export async function POST(request: NextRequest) {
 
     await fs.writeFile(filepath, buffer);
     
+    // Register file in DB
+    const db = await readDB();
+    if (!db.files) db.files = [];
+    db.files.push({
+      id: `file-${Date.now()}`,
+      url: `/uploads/${filename}`,
+      name: file.name,
+      mimetype: file.type,
+      size: file.size,
+      uploadedBy: user.sub,
+      createdAt: new Date().toISOString()
+    });
+    await writeDB(db);
+
     return NextResponse.json({
       url: `/uploads/${filename}`,
       mimetype: file.type,

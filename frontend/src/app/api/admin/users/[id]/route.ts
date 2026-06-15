@@ -21,6 +21,8 @@ export async function GET(
 
   if (targetUser.role === 'STUDENT') {
     profile = db.students.find((s: any) => s.userId === targetUser.id);
+  } else if (targetUser.role === 'TEACHER') {
+    profile = db.teachers?.find((t: any) => t.userId === targetUser.id);
   } else if (targetUser.role === 'HEAD_DEPARTMENT') {
     department = db.departments.find((d: any) => d.headUserId === targetUser.id);
   }
@@ -75,6 +77,45 @@ export async function PUT(
         familyStatus: data.familyStatus,
         hobbies: data.hobbies
       };
+    }
+  } else if (data.role === 'TEACHER') {
+    if (!db.teachers) db.teachers = [];
+    const teacherIndex = db.teachers.findIndex((t: any) => t.userId === targetId);
+    if (teacherIndex !== -1) {
+      db.teachers[teacherIndex] = {
+        ...db.teachers[teacherIndex],
+        departmentId: data.departmentId,
+        position: data.position,
+        curatorshipGroup: data.curatorshipGroup,
+        education: data.education,
+        qualificationCategory: data.qualificationCategory,
+        totalExperience: data.totalExperience,
+        pedagogicalExperience: data.pedagogicalExperience,
+        trainingCertificates: data.trainingCertificates,
+        nationality: data.nationality,
+        birthPlace: data.birthPlace,
+        actualAddress: data.actualAddress,
+        familyStatus: data.familyStatus,
+        hobbies: data.hobbies
+      };
+    } else {
+      db.teachers.push({
+        id: `teacher-${Date.now()}`,
+        userId: targetId,
+        departmentId: data.departmentId || '',
+        position: data.position || '',
+        curatorshipGroup: data.curatorshipGroup || '',
+        education: data.education || '',
+        qualificationCategory: data.qualificationCategory || '',
+        totalExperience: data.totalExperience || '',
+        pedagogicalExperience: data.pedagogicalExperience || '',
+        trainingCertificates: data.trainingCertificates || '',
+        nationality: data.nationality || '',
+        birthPlace: data.birthPlace || '',
+        actualAddress: data.actualAddress || '',
+        familyStatus: data.familyStatus || '',
+        hobbies: data.hobbies || ''
+      });
     }
   } else if (data.role === 'HEAD_DEPARTMENT') {
     // Check if department changed

@@ -26,6 +26,16 @@ interface Profile {
   actualAddress: string | null;
   familyStatus: string | null;
   hobbies: string | null;
+  
+  // Teacher specific
+  role?: string;
+  position?: string;
+  curatorshipGroup?: string;
+  education?: string;
+  qualificationCategory?: string;
+  totalExperience?: string;
+  pedagogicalExperience?: string;
+  trainingCertificates?: string;
 }
 
 export default function ProfilePage() {
@@ -33,7 +43,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/students/me')
+    api.get('/users/me')
       .then(res => setProfile(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
@@ -57,7 +67,7 @@ export default function ProfilePage() {
       const uploadData = await uploadRes.json();
       const newAvatarUrl = uploadData.url;
 
-      await api.patch('/students/me', { avatarUrl: newAvatarUrl });
+      await api.patch('/users/me', { avatarUrl: newAvatarUrl });
       
       setProfile(prev => prev ? { ...prev, avatarUrl: newAvatarUrl } : null);
       toast.success('Фото обновлено', { id: 'upload' });
@@ -115,9 +125,16 @@ export default function ProfilePage() {
             {profile.lastName} {profile.firstName} {profile.patronymic}
           </h1>
           <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-400">
-            <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> ID: {profile.studentIdNumber}</span>
+            {profile.role !== 'TEACHER' && (
+              <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> ID: {profile.studentIdNumber}</span>
+            )}
             <span className="flex items-center gap-1"><Building className="h-4 w-4" /> {profile.department}</span>
-            <span className="flex items-center gap-1"><Users className="h-4 w-4" /> Группа {profile.groupName}</span>
+            {profile.role !== 'TEACHER' && (
+              <span className="flex items-center gap-1"><Users className="h-4 w-4" /> Группа {profile.groupName}</span>
+            )}
+            {profile.role === 'TEACHER' && profile.position && (
+              <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> {profile.position}</span>
+            )}
           </div>
         </div>
       </motion.div>
@@ -167,20 +184,49 @@ export default function ProfilePage() {
 
         {/* Academic Info */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6">
-          <h3 className="text-lg font-medium text-white mb-6 border-b border-white/10 pb-4">Академическая информация</h3>
+          <h3 className="text-lg font-medium text-white mb-6 border-b border-white/10 pb-4">
+            {profile.role === 'TEACHER' ? 'Официальные и профессиональные данные' : 'Академическая информация'}
+          </h3>
           <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><Users className="h-5 w-5 text-accent" /></div>
-              <div><p className="text-sm text-gray-500">Группа</p><p className="text-white">{profile.groupName}</p></div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><ShieldCheck className="h-5 w-5 text-accent" /></div>
-              <div><p className="text-sm text-gray-500">Курс</p><p className="text-white">{profile.courseYear}</p></div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><User className="h-5 w-5 text-accent" /></div>
-              <div><p className="text-sm text-gray-500">Куратор</p><p className="text-white">{profile.curatorName || 'Не назначен'}</p></div>
-            </div>
+            {profile.role === 'TEACHER' ? (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0"><ShieldCheck className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Образование</p><p className="text-white">{profile.education || 'Не указано'}</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0"><Award className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Квалификационная категория</p><p className="text-white">{profile.qualificationCategory || 'Не указана'}</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0"><Calendar className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Общий стаж работы</p><p className="text-white">{profile.totalExperience || 'Не указан'}</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0"><Calendar className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Педагогический стаж</p><p className="text-white">{profile.pedagogicalExperience || 'Не указан'}</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0"><FileText className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Повышение квалификации</p><p className="text-white">{profile.trainingCertificates || 'Нет'}</p></div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><Users className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Группа</p><p className="text-white">{profile.groupName}</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><ShieldCheck className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Курс</p><p className="text-white">{profile.courseYear}</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><User className="h-5 w-5 text-accent" /></div>
+                  <div><p className="text-sm text-gray-500">Куратор</p><p className="text-white">{profile.curatorName || 'Не назначен'}</p></div>
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
       </div>

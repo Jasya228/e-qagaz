@@ -65,6 +65,26 @@ export async function POST(request: NextRequest) {
         hobbies: data.hobbies || ''
       };
       db.students.push(newStudent);
+    } else if (data.role === 'TEACHER') {
+      const newTeacher = {
+        id: `teacher-${Date.now()}`,
+        userId: newUser.id,
+        departmentId: data.departmentId || '',
+        position: data.position || '',
+        curatorshipGroup: data.curatorshipGroup || '',
+        education: data.education || '',
+        qualificationCategory: data.qualificationCategory || '',
+        totalExperience: data.totalExperience || '',
+        pedagogicalExperience: data.pedagogicalExperience || '',
+        trainingCertificates: data.trainingCertificates || '',
+        nationality: data.nationality || '',
+        birthPlace: data.birthPlace || '',
+        actualAddress: data.actualAddress || '',
+        familyStatus: data.familyStatus || '',
+        hobbies: data.hobbies || ''
+      };
+      if (!db.teachers) db.teachers = [];
+      db.teachers.push(newTeacher);
     } else if (data.role === 'HEAD_DEPARTMENT') {
       if (data.departmentId) {
         const deptIndex = db.departments.findIndex((d: any) => d.id === data.departmentId);

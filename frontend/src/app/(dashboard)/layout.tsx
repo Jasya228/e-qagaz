@@ -162,6 +162,13 @@ export default function DashboardLayout({
         { name: 'Настройки', href: '/settings', icon: Settings },
       ];
     }
+    if (user.role === 'TEACHER') {
+      return [
+        { name: 'Обо мне', href: '/profile', icon: UserIcon },
+        { name: 'Моя группа', href: '/my-group', icon: Users },
+        { name: 'Настройки', href: '/settings', icon: Settings },
+      ];
+    }
     // STUDENT
     return [
       { name: 'Обо мне', href: '/profile', icon: UserIcon },

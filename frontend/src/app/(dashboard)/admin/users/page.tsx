@@ -34,6 +34,9 @@ export default function AdminUsersPage() {
     phone: '', dateOfBirth: '', gender: 'MALE', role: 'STUDENT',
     // Student specifics
     groupName: '', courseYear: 1, studentIdNumber: '', departmentId: '', curatorName: '',
+    // Teacher specifics
+    position: '', curatorshipGroup: '', education: '', qualificationCategory: '',
+    totalExperience: '', pedagogicalExperience: '', trainingCertificates: '',
     nationality: '', birthPlace: '', actualAddress: '', familyStatus: '', hobbies: ''
   };
   const [formData, setFormData] = useState(initialFormState);
@@ -130,6 +133,13 @@ export default function AdminUsersPage() {
         studentIdNumber: data.profile?.studentIdNumber || '',
         departmentId: data.profile?.departmentId || data.department?.id || '',
         curatorName: data.profile?.curatorName || '',
+        position: data.profile?.position || '',
+        curatorshipGroup: data.profile?.curatorshipGroup || '',
+        education: data.profile?.education || '',
+        qualificationCategory: data.profile?.qualificationCategory || '',
+        totalExperience: data.profile?.totalExperience || '',
+        pedagogicalExperience: data.profile?.pedagogicalExperience || '',
+        trainingCertificates: data.profile?.trainingCertificates || '',
         nationality: data.profile?.nationality || '',
         birthPlace: data.profile?.birthPlace || '',
         actualAddress: data.profile?.actualAddress || '',
@@ -226,6 +236,7 @@ export default function AdminUsersPage() {
                     <label className="block text-sm text-gray-400 mb-2">Тип пользователя</label>
                     <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent">
                       <option value="STUDENT">Студент</option>
+                      <option value="TEACHER">Преподаватель</option>
                       <option value="HEAD_DEPARTMENT">Заведующий отделением</option>
                       <option value="ADMIN">Администратор</option>
                     </select>
@@ -281,6 +292,37 @@ export default function AdminUsersPage() {
                           ID: {formData.studentIdNumber} (Авто)
                         </div>
                       )}
+
+                      <div className="col-span-full border-b border-white/10 pb-2 mb-2 mt-4">
+                        <h4 className="text-accent font-medium text-sm uppercase tracking-wider">Дополнительная информация (Обо мне)</h4>
+                      </div>
+                      <input type="text" placeholder="Национальность" value={formData.nationality} onChange={e => setFormData({...formData, nationality: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Место рождения" value={formData.birthPlace} onChange={e => setFormData({...formData, birthPlace: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Фактический адрес" value={formData.actualAddress} onChange={e => setFormData({...formData, actualAddress: e.target.value})} className="col-span-full md:col-span-2 lg:col-span-1 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Состав семьи" value={formData.familyStatus} onChange={e => setFormData({...formData, familyStatus: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Хобби" value={formData.hobbies} onChange={e => setFormData({...formData, hobbies: e.target.value})} className="col-span-full md:col-span-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                    </>
+                  )}
+
+                  {selectedRole === 'TEACHER' && (
+                    <>
+                      <div className="col-span-full border-b border-white/10 pb-2 mb-2 mt-4">
+                        <h4 className="text-accent font-medium text-sm uppercase tracking-wider">Официальные и профессиональные данные</h4>
+                      </div>
+                      <select required value={formData.departmentId} onChange={e => setFormData({...formData, departmentId: e.target.value})} className="col-span-full md:col-span-1 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent">
+                        <option value="">Выберите кафедру / отделение</option>
+                        {references.departments.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                      <input type="text" placeholder="Должность" value={formData.position} onChange={e => setFormData({...formData, position: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <select value={formData.curatorshipGroup} onChange={e => setFormData({...formData, curatorshipGroup: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent">
+                        <option value="">Кураторство (Группа)</option>
+                        {references.groups.map((g: any) => <option key={g.id} value={g.name}>{g.name}</option>)}
+                      </select>
+                      <input type="text" placeholder="Образование" value={formData.education} onChange={e => setFormData({...formData, education: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Квалификационная категория" value={formData.qualificationCategory} onChange={e => setFormData({...formData, qualificationCategory: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Общий стаж работы" value={formData.totalExperience} onChange={e => setFormData({...formData, totalExperience: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Педагогический стаж" value={formData.pedagogicalExperience} onChange={e => setFormData({...formData, pedagogicalExperience: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      <input type="text" placeholder="Повышение квалификации" value={formData.trainingCertificates} onChange={e => setFormData({...formData, trainingCertificates: e.target.value})} className="col-span-full md:col-span-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
 
                       <div className="col-span-full border-b border-white/10 pb-2 mb-2 mt-4">
                         <h4 className="text-accent font-medium text-sm uppercase tracking-wider">Дополнительная информация (Обо мне)</h4>
