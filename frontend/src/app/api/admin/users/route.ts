@@ -74,6 +74,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!db.logs) db.logs = [];
+    db.logs.push({
+      id: `log-${Date.now()}`,
+      userId: user.sub,
+      action: 'CREATE_USER',
+      details: { targetEmail: newUser.email, role: newUser.role },
+      createdAt: new Date().toISOString()
+    });
+
     await writeDB(db);
     return NextResponse.json({ ...newUser, defaultPassword: 'password123' }, { status: 201 });
   } catch (error) {

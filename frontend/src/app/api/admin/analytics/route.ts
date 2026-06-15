@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
   const totalStudents = db.users.filter((u: any) => u.role === 'STUDENT').length;
   const totalHeads = db.users.filter((u: any) => u.role === 'HEAD_DEPARTMENT').length;
   const totalFiles = db.files.length;
-  const recentLogs = db.logs.slice(0, 50).reverse();
+  const recentLogs = db.logs.slice(-50).reverse().map((log: any) => ({
+    ...log,
+    user: db.users.find((u: any) => u.id === log.userId) || { firstName: 'Система', lastName: '' }
+  }));
 
   return NextResponse.json({
     users: totalUsers,

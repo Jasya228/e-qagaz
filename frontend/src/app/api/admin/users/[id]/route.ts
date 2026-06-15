@@ -90,6 +90,15 @@ export async function PUT(
     }
   }
 
+    if (!db.logs) db.logs = [];
+    db.logs.push({
+      id: `log-${Date.now()}`,
+      userId: user.sub,
+      action: 'UPDATE_USER',
+      details: { targetId, role: data.role },
+      createdAt: new Date().toISOString()
+    });
+
   await writeDB(db);
   return NextResponse.json({ message: 'User updated successfully' });
 }

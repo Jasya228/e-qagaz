@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDB, writeDB } from '@/lib/db';
+import { signJWT } from '@/lib/auth-server';
 
 export async function POST(request: Request) {
   try {
@@ -16,6 +17,19 @@ export async function POST(request: Request) {
     if (!user.isActive) {
       return NextResponse.json({ message: 'Аккаунт заблокирован' }, { status: 403 });
     }
+
+    const refreshToken = await signJWT({ sub: user.id, email: user.email, role: user.role }, '7d');
+
+    // Add log
+    if (!db.logs) db.logs = [];
+    db.logs.push({
+      id: `log-${Date.now()}`,
+      userId: user.id,
+      action: 'LOGIN',
+      details: { email: user.email },
+      createdAt: new Date().toISOString()
+    });
+    await writeDB(db);
 
     const payload = { sub: user.id, role: user.role };
     const token = Buffer.from(JSON.stringify(payload)).toString('base64');
