@@ -5,6 +5,14 @@ const DB_PATH = path.join(__dirname, 'data', 'db.json');
 
 const studentsData = [
   {
+    lastName: "Асанов", firstName: "Саят", patronymic: "Жаксилик Оглы",
+    dob: "2005-11-06", nationality: "Казах",
+    birthPlace: "Алматы",
+    actualAddress: "Алматы",
+    familyStatus: "Полная", homePhone: "", mobilePhone: "8 707 705 1106",
+    hobbies: "Программирование", gender: "MALE", emailPrefix: "asanovsayat"
+  },
+  {
     lastName: "Алфёрова", firstName: "Анна", patronymic: "Александровна",
     dob: "2006-06-23", nationality: "русская",
     birthPlace: "Ауэзовский район, Утеген батыра 92, кв 8",
@@ -129,9 +137,8 @@ const studentsData = [
 function seed() {
   const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
   
-  // Clear old users and students (keep only admin and head)
-  db.users = db.users.filter(u => u.role !== 'STUDENT');
-  db.students = [];
+  // Do NOT clear old users and students to preserve Asanov Sayat
+  if (!db.students) db.students = [];
   
   // Also we need to make sure department and group exist
   const departmentId = db.departments[0]?.id || "departments-1";
@@ -145,6 +152,13 @@ function seed() {
   }
 
   studentsData.forEach((s, i) => {
+    const email = `${s.emailPrefix}@aspc.kz`.toLowerCase();
+    
+    // Check if student already exists to prevent duplicates
+    if (db.users.find(u => u.email === email)) {
+      return; // Skip if exists
+    }
+
     const userId = `user-${Date.now()}-${i}`;
     const studentProfileId = `stu-profile-${Date.now()}-${i}`;
     

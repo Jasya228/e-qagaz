@@ -11,7 +11,6 @@ export default function AdminReferencesPage() {
 
   // Form states
   const [groupName, setGroupName] = useState('');
-  const [curatorName, setCuratorName] = useState('');
   const [deptName, setDeptName] = useState('');
 
   const fetchReferences = async () => {
@@ -61,7 +60,7 @@ export default function AdminReferencesPage() {
         <p className="text-gray-400 mt-1">Управление выпадающими списками системы</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* GROUPS */}
         <div className="glass-card p-6 flex flex-col h-full">
@@ -91,33 +90,6 @@ export default function AdminReferencesPage() {
           </div>
         </div>
 
-        {/* CURATORS */}
-        <div className="glass-card p-6 flex flex-col h-full">
-          <h3 className="text-lg font-bold text-white mb-4">ФИО Кураторов</h3>
-          <div className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              placeholder="ФИО куратора" 
-              value={curatorName} 
-              onChange={e => setCuratorName(e.target.value)} 
-              className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent"
-            />
-            <button onClick={() => handleAdd('curators', { name: curatorName }, () => setCuratorName(''))} className="p-2 bg-accent text-white rounded-xl hover:bg-blue-600 transition-colors">
-              <Plus className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto max-h-80 space-y-2 custom-scrollbar pr-2">
-            {data.curators.map((c: any) => (
-              <div key={c.id} className="flex justify-between items-center p-3 bg-white/5 border border-white/5 rounded-xl">
-                <span className="text-gray-300 text-sm">{c.name}</span>
-                <button onClick={() => handleDelete('curators', c.id)} className="text-gray-500 hover:text-red-400 transition-colors">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-            {data.curators.length === 0 && <p className="text-sm text-gray-500">Нет добавленных кураторов</p>}
-          </div>
-        </div>
 
         {/* DEPARTMENTS */}
         <div className="glass-card p-6 flex flex-col h-full">

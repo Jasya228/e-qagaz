@@ -7,9 +7,18 @@ export async function GET(request: NextRequest) {
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
 
   const db = await readDB();
+  
+  // Replace the old db.curators with dynamically generated list of teachers
+  const teacherCurators = db.users
+    .filter((u: any) => u.role === 'TEACHER')
+    .map((u: any) => ({
+      id: u.id,
+      name: `${u.lastName || ''} ${u.firstName || ''} ${u.patronymic || ''}`.trim()
+    }));
+
   return NextResponse.json({
     groups: db.groups || [],
-    curators: db.curators || [],
+    curators: teacherCurators,
     departments: db.departments || []
   });
 }
