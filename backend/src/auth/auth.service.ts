@@ -28,7 +28,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES') as any,
     });
 
     // Hash refresh token for DB storage
