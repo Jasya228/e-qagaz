@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { User, Phone, Mail, Calendar, Users, Building, ShieldCheck, Camera } from 'lucide-react';
+import { User, Phone, Mail, Calendar, Users, Building, ShieldCheck, Camera, Award, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
