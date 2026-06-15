@@ -7,7 +7,7 @@ async function main() {
   console.log('Создание аккаунта администратора...');
   
   const email = 'admin@aspc.kz';
-  const password = 'admin'; // Можете поменять пароль здесь
+  const password = 'admin123'; // Можете поменять пароль здесь
   const passwordHash = await bcrypt.hash(password, 10);
 
   const existingAdmin = await prisma.user.findUnique({ where: { email } });
