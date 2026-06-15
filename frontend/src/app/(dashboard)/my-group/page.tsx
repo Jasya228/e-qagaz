@@ -3,14 +3,15 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
+import { Users, Mail, Phone, ShieldCheck } from 'lucide-react';
 
 export default function MyGroupPage() {
-  const [profile, setProfile] = useState<any>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/users/me')
-      .then(res => setProfile(res.data))
+    api.get('/teachers/my-group')
+      .then(res => setData(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
@@ -19,7 +20,7 @@ export default function MyGroupPage() {
     return <div className="animate-pulse">Загрузка...</div>;
   }
 
-  if (!profile?.curatorshipGroup) {
+  if (!data?.groupName) {
     return (
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
@@ -39,10 +40,59 @@ export default function MyGroupPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">Моя группа: {profile.curatorshipGroup}</h2>
+        <h2 className="text-2xl font-bold text-white">Моя группа: {data.groupName}</h2>
+        <div className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2 text-gray-300">
+          <Users className="h-5 w-5 text-accent" />
+          <span>Всего студентов: {data.students?.length || 0}</span>
+        </div>
       </div>
-      <div className="glass-card p-6">
-        <p className="text-gray-400">Список студентов вашей группы скоро появится здесь.</p>
+      
+      <div className="glass-card overflow-hidden">
+        {data.students?.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-400">
+              <thead className="bg-white/5 text-gray-300 border-b border-white/10">
+                <tr>
+                  <th className="px-6 py-4">Студент</th>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Телефон</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {data.students.map((student: any) => (
+                  <tr key={student.id} className="hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold border border-accent/30 overflow-hidden flex-shrink-0">
+                        {student.avatarUrl ? (
+                          <img src={student.avatarUrl} alt="Аватар" className="h-full w-full object-cover" />
+                        ) : (
+                          `${student.firstName?.[0] || ''}${student.lastName?.[0] || ''}`
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-white font-medium">{student.lastName} {student.firstName} {student.patronymic}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-accent" /> {student.studentIdNumber || '-'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-1"><Mail className="h-4 w-4 text-gray-500" /> {student.email}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-1"><Phone className="h-4 w-4 text-gray-500" /> {student.phone || '-'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="p-12 text-center text-gray-400">
+            В эту группу пока не добавлено ни одного студента.
+          </div>
+        )}
       </div>
     </div>
   );
