@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, User as UserIcon, LayoutDashboard, FileText, Settings, Award, Users, Bell, Check } from 'lucide-react';
+import { LogOut, User as UserIcon, LayoutDashboard, FileText, Settings, Award, Users, Bell, Check, Menu, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import GlobalAICopilot from '@/components/GlobalAICopilot';
 
@@ -124,6 +124,12 @@ export default function DashboardLayout({
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     try {
@@ -171,11 +177,32 @@ export default function DashboardLayout({
   if (!user) return null; // could show a loading skeleton
 
   return (
-    <div className="grid grid-cols-[250px_1fr] h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
+      
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 glass border-r border-white/5 flex flex-col h-full sticky top-0">
-        <div className="h-16 flex items-center px-6 border-b border-white/5">
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 w-64 glass border-r border-white/5 flex flex-col h-full transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
           <h1 className="text-xl font-bold text-white tracking-wider">e-qagaz</h1>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-gray-400 hover:text-white">
+            <X className="h-6 w-6" />
+          </button>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
           {navItems.map((item) => {
@@ -206,16 +233,24 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main area */}
-      <div className="flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
-        <header className="h-16 glass border-b border-white/5 flex items-center justify-between px-8 z-10 sticky top-0">
-          <div className="text-sm text-gray-400 hidden sm:block">
-            {new Date().toLocaleDateString('ru-RU', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
+        <header className="h-16 glass border-b border-white/5 flex items-center justify-between px-4 md:px-8 z-10 sticky top-0">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden text-gray-400 hover:text-white p-2 -ml-2"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <div className="text-sm text-gray-400 hidden md:block">
+              {new Date().toLocaleDateString('ru-RU', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </div>
           </div>
           <div className="flex items-center gap-6 ml-auto">
             <NotificationsDropdown />
@@ -234,7 +269,7 @@ export default function DashboardLayout({
           </div>
         </header>
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-8 animate-in">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 animate-in w-full max-w-[100vw]">
           {children}
         </main>
       </div>

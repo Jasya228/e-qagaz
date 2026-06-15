@@ -182,8 +182,8 @@ export default function AdminJournalPage() {
                 Перейдите в раздел "Оценки" (Назначение уроков), чтобы создать даты занятий.
               </div>
             ) : (
-              <div className="overflow-x-auto pb-4 custom-scrollbar">
-                <table className="w-full text-sm text-left text-gray-400 whitespace-nowrap">
+              <div className="glass-card overflow-x-auto">
+                <table className="w-full text-sm text-left text-gray-400 min-w-[800px] whitespace-nowrap">
                   <thead className="bg-white/5 text-gray-300 border-b border-white/10">
                     <tr>
                       <th className="px-4 py-3 sticky left-0 bg-[#0F172A] z-10 min-w-[200px]">ФИО Студента</th>

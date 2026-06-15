@@ -72,8 +72,8 @@ export default function AdminSubjectsPage() {
         </button>
       </div>
 
-      <div className="glass-card overflow-hidden">
-        <table className="w-full text-sm text-left text-gray-400">
+      <div className="glass-card overflow-x-auto">
+        <table className="w-full text-sm text-left text-gray-400 min-w-[500px]">
           <thead className="bg-white/5 text-gray-300 border-b border-white/10">
             <tr>
               <th className="px-6 py-4">Название</th>
@@ -103,7 +103,7 @@ export default function AdminSubjectsPage() {
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-lg glass-card p-6 z-10">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-lg glass-card p-4 md:p-6 z-10 max-h-[90vh] overflow-y-auto">
               <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="h-5 w-5" /></button>
               <h3 className="text-xl font-bold text-white mb-6">Новый предмет</h3>
               

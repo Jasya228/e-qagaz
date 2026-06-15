@@ -176,8 +176,8 @@ export default function AdminLessonsPage() {
         {/* List of Lessons */}
         <div className="lg:col-span-2 glass-card p-6">
           <h3 className="text-lg font-bold text-white mb-4">Назначенные уроки</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-400">
+          <div className="glass-card overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-400 min-w-[600px]">
               <thead className="bg-white/5 text-gray-300 border-b border-white/10">
                 <tr>
                   <th className="px-4 py-3">Дата</th>

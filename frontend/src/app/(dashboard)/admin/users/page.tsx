@@ -170,8 +170,8 @@ export default function AdminUsersPage() {
         </button>
       </div>
 
-      <div className="glass-card overflow-hidden">
-        <table className="w-full text-sm text-left text-gray-400">
+      <div className="glass-card overflow-x-auto">
+        <table className="w-full text-sm text-left text-gray-400 min-w-[600px]">
           <thead className="bg-white/5 text-gray-300 border-b border-white/10">
             <tr>
               <th className="px-6 py-4">ФИО / Email</th>
@@ -214,7 +214,7 @@ export default function AdminUsersPage() {
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-4xl glass-card p-8 z-10 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-4xl glass-card p-4 md:p-8 z-10 max-h-[90vh] overflow-y-auto custom-scrollbar">
               <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="h-5 w-5" /></button>
               <h3 className="text-xl font-bold text-white mb-6">
                 {isEditing ? 'Редактирование пользователя' : 'Создание пользователя'}
@@ -320,7 +320,7 @@ export default function AdminUsersPage() {
         {isResetModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsResetModalOpen(false)} />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-md glass-card p-8 z-10">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-md glass-card p-4 md:p-8 z-10">
               <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="h-5 w-5" /></button>
               <h3 className="text-xl font-bold text-white mb-6">Сброс пароля</h3>
               
