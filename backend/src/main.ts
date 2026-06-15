@@ -12,7 +12,7 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [process.env.FRONTEND_URL || 'http://localhost:3000', 'https://ekagas.aspc.kz', 'https://www.ekagas.aspc.kz'],
     credentials: true,
   });
 

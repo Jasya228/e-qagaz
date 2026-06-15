@@ -69,7 +69,6 @@ export async function PUT(
         groupName: data.groupName,
         courseYear: data.courseYear,
         curatorName: data.curatorName,
-        studentIdNumber: data.studentIdNumber,
         nationality: data.nationality,
         birthPlace: data.birthPlace,
         actualAddress: data.actualAddress,

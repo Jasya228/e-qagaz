@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { readDB } from '@/lib/db';
+import { readDB, writeDB } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
 
 export async function GET(request: NextRequest) {
@@ -39,11 +39,22 @@ export async function POST(request: NextRequest) {
     db.users.push(newUser);
 
     if (data.role === 'STUDENT') {
+      let maxIdNum = 0;
+      db.students.forEach((s: any) => {
+        if (s.studentIdNumber && s.studentIdNumber.startsWith('STU')) {
+          const num = parseInt(s.studentIdNumber.replace('STU', ''), 10);
+          if (!isNaN(num) && num > maxIdNum) {
+            maxIdNum = num;
+          }
+        }
+      });
+      const generatedStudentId = `STU${(maxIdNum + 1).toString().padStart(3, '0')}`;
+
       const newStudent = {
         id: `stu-${Date.now()}`,
         userId: newUser.id,
         departmentId: data.departmentId,
-        studentIdNumber: data.studentIdNumber,
+        studentIdNumber: generatedStudentId,
         courseYear: data.courseYear,
         groupName: data.groupName,
         curatorName: data.curatorName,

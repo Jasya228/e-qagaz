@@ -17,6 +17,13 @@ export default function AdminUsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+
+  // Reset Password Modal State
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetUserId, setResetUserId] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   // Selected Role (for Create)
   const [selectedRole, setSelectedRole] = useState('STUDENT');
@@ -67,13 +74,26 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleResetPassword = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите сбросить пароль?')) return;
+  const openResetPasswordModal = (id: string) => {
+    setResetUserId(id);
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    setIsResetModalOpen(true);
+  };
+
+  const submitResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error('Пароли не совпадают');
+      return;
+    }
     try {
-      const res = await api.patch(`/admin/users/${id}/reset-password`);
-      toast.success(`Пароль сброшен. Новый пароль: ${res.data.defaultPassword}`, { duration: 10000 });
+      await api.patch(`/admin/users/${resetUserId}/reset-password`, { newPassword });
+      toast.success('Пароль успешно сброшен!');
+      setIsResetModalOpen(false);
     } catch (err) {
-      toast.error('Ошибка');
+      toast.error('Ошибка сброса пароля');
     }
   };
 
@@ -177,7 +197,7 @@ export default function AdminUsersPage() {
                   <button onClick={() => openEditModal(u)} className="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-blue-400" title="Редактировать">
                     <Edit2 className="h-4 w-4" />
                   </button>
-                  <button onClick={() => handleResetPassword(u.id)} className="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-white" title="Сбросить пароль">
+                  <button onClick={() => openResetPasswordModal(u.id)} className="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-white" title="Сбросить пароль">
                     <KeyRound className="h-4 w-4" />
                   </button>
                   <button onClick={() => handleBlock(u.id, u.isActive)} className={`p-2 rounded-lg text-white ${u.isActive ? 'bg-red-500/20 hover:bg-red-500/40 text-red-400' : 'bg-green-500/20 hover:bg-green-500/40 text-green-400'}`} title={u.isActive ? 'Заблокировать' : 'Разблокировать'}>
@@ -256,8 +276,11 @@ export default function AdminUsersPage() {
                         <option value="">Выберите куратора</option>
                         {references.curators.map((c: any) => <option key={c.id} value={c.name}>{c.name}</option>)}
                       </select>
-                      
-                      <input type="text" required placeholder="ID Студента (Номер билета)" value={formData.studentIdNumber} onChange={e => setFormData({...formData, studentIdNumber: e.target.value})} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                      {isEditing && formData.studentIdNumber && (
+                        <div className="col-span-full md:col-span-1 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-400">
+                          ID: {formData.studentIdNumber} (Авто)
+                        </div>
+                      )}
 
                       <div className="col-span-full border-b border-white/10 pb-2 mb-2 mt-4">
                         <h4 className="text-accent font-medium text-sm uppercase tracking-wider">Дополнительная информация (Обо мне)</h4>
@@ -288,6 +311,34 @@ export default function AdminUsersPage() {
                   <button type="submit" className="px-8 py-2 bg-accent hover:bg-blue-600 text-white font-medium rounded-xl transition-colors">
                     {isEditing ? 'Сохранить изменения' : 'Создать'}
                   </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {isResetModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsResetModalOpen(false)} />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-md glass-card p-8 z-10">
+              <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="h-5 w-5" /></button>
+              <h3 className="text-xl font-bold text-white mb-6">Сброс пароля</h3>
+              
+              <form onSubmit={submitResetPassword} className="space-y-4">
+                <div className="relative">
+                  <input type={showPassword ? "text" : "password"} required placeholder="Новый пароль" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                </div>
+                <div className="relative">
+                  <input type={showPassword ? "text" : "password"} required placeholder="Подтвердите пароль" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent" />
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <input type="checkbox" id="showPassword" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} className="rounded border-white/10 bg-white/5" />
+                  <label htmlFor="showPassword" className="text-sm text-gray-400">Показать пароль</label>
+                </div>
+                
+                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                  <button type="button" onClick={() => setIsResetModalOpen(false)} className="px-4 py-2 text-gray-400">Отмена</button>
+                  <button type="submit" className="px-8 py-2 bg-accent hover:bg-blue-600 text-white font-medium rounded-xl transition-colors">Сохранить</button>
                 </div>
               </form>
             </motion.div>

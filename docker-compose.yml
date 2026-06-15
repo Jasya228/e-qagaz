@@ -22,6 +22,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-eqagaz_db}?schema=public
       JWT_SECRET: ${JWT_SECRET:-super-secret-production-key}
+      FRONTEND_URL: https://ekagas.aspc.kz
     volumes:
       - backend_uploads:/app/uploads
     depends_on:
