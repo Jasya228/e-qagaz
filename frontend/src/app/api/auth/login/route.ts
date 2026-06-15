@@ -5,9 +5,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body;
+    const normalizedEmail = email.toLowerCase().trim();
 
     const db = await readDB();
-    const user = db.users.find((u: any) => u.email === email && u.passwordHash === password);
+    const user = db.users.find((u: any) => u.email.toLowerCase() === normalizedEmail && u.passwordHash === password);
 
     if (!user) {
       return NextResponse.json({ message: 'Неверный email или пароль' }, { status: 401 });
