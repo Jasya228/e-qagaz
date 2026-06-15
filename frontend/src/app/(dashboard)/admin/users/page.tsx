@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // References Data
   const [references, setReferences] = useState({ groups: [], curators: [], departments: [] });
@@ -171,13 +172,22 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Управление пользователями</h2>
         </div>
-        <button onClick={openCreateModal} className="glass-button flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white">
-          <Plus className="h-4 w-4" /> Добавить пользователя
-        </button>
+        <div className="flex gap-4 w-full md:w-auto">
+          <input 
+            type="text" 
+            placeholder="Поиск по ФИО, Email или Роли..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent min-w-[300px]"
+          />
+          <button onClick={openCreateModal} className="glass-button flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white flex-shrink-0">
+            <Plus className="h-4 w-4" /> Добавить пользователя
+          </button>
+        </div>
       </div>
 
       <div className="glass-card overflow-x-auto">
@@ -191,7 +201,9 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {users.map((u) => (
+            {users.filter(u => 
+              `${u.lastName} ${u.firstName} ${u.email} ${u.role}`.toLowerCase().includes(searchQuery.toLowerCase())
+            ).map((u) => (
               <tr key={u.id} className="hover:bg-white/5">
                 <td className="px-6 py-4">
                   <div className="text-white font-medium">{u.lastName} {u.firstName}</div>
@@ -204,7 +216,7 @@ export default function AdminUsersPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right space-x-2">
-                  <button onClick={() => openEditModal(u)} className="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-blue-400" title="Редактировать">
+                  <button onClick={() => openEditModal(u)} className="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-blue-400" title="Редактировать / Просмотреть профиль">
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button onClick={() => openResetPasswordModal(u.id)} className="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-white" title="Сбросить пароль">
