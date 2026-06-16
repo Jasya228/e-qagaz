@@ -17,6 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" className="dark">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light');
+          }
+        `}} />
+      </head>
       <body className={inter.className}>
         <div className="relative min-h-screen flex flex-col">
           {/* Global Background Glow - Matching Login Page Design */}

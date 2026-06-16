@@ -64,7 +64,7 @@ export default function MyGroupPage() {
               <tbody className="divide-y divide-white/5">
                 {data.students.map((student: any) => (
                   <tr 
-                    key={student.id} 
+                    key={student.id || student.userId} 
                     className="hover:bg-white/5 transition-colors cursor-pointer"
                     onClick={() => router.push(`/my-group/${student.userId}`)}
                   >

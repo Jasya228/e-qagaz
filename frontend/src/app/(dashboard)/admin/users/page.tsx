@@ -72,7 +72,10 @@ export default function AdminUsersPage() {
   useEffect(() => {
     const mainEl = document.querySelector('main');
     if (isModalOpen || isResetModalOpen) {
-      if (mainEl) mainEl.style.overflow = 'hidden';
+      if (mainEl) {
+        mainEl.style.overflow = 'hidden';
+        mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } else {
       if (mainEl) mainEl.style.overflow = 'auto';
     }

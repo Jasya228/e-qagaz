@@ -4,11 +4,28 @@ import { useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Moon, Sun } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
+  const [isLight, setIsLight] = useState(false);
+  
+  useEffect(() => {
+    setIsLight(document.documentElement.classList.contains('light'));
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isLight;
+    setIsLight(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    }
+  };
   
   const [formData, setFormData] = useState({
     password: '',
@@ -49,10 +66,27 @@ export default function SettingsPage() {
     <div className="max-w-md mx-auto space-y-6 mt-10">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2">Настройки</h2>
-        <p className="text-gray-400">Смена пароля от учетной записи</p>
+        <p className="text-gray-400">Внешний вид и безопасность</p>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8">
+      {/* Theme Settings */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium text-white">Тема оформления</h3>
+          <p className="text-sm text-gray-400">Переключение между темной и светлой темой</p>
+        </div>
+        <button 
+          onClick={toggleTheme}
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors border border-white/10 text-white flex items-center gap-2"
+        >
+          {isLight ? <Sun className="h-5 w-5 text-yellow-500" /> : <Moon className="h-5 w-5 text-blue-400" />}
+          {isLight ? 'Светлая' : 'Темная'}
+        </button>
+      </motion.div>
+
+      {/* Password Settings */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-8">
+        <h3 className="text-lg font-medium text-white mb-6">Смена пароля</h3>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Новый пароль</label>

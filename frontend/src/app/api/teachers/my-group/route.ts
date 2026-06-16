@@ -23,14 +23,14 @@ export async function GET(request: NextRequest) {
     .filter((s: any) => s.groupName === groupName)
     .map((s: any) => {
       const u = db.users.find((user: any) => user.id === s.userId) || {};
-      return {
-        id: u.id,
+        id: s.id,
+        userId: u.id,
         firstName: u.firstName,
         lastName: u.lastName,
         patronymic: u.patronymic,
         email: u.email,
         phone: s.phoneNumber || u.phone,
-        avatarUrl: u.avatarUrl,
+        avatarUrl: u.avatarUrl || s.avatarUrl || null,
         studentIdNumber: s.studentIdNumber,
       };
     });
