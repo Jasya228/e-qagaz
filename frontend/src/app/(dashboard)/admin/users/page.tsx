@@ -68,6 +68,16 @@ export default function AdminUsersPage() {
     fetchReferences();
   }, []);
 
+  // Prevent background scroll when any modal is open
+  useEffect(() => {
+    if (isModalOpen || isResetModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isModalOpen, isResetModalOpen]);
+
   const handleBlock = async (id: string, currentlyActive: boolean) => {
     try {
       await api.patch(`/admin/users/${id}/block`, { block: currentlyActive });

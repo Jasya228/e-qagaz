@@ -9,20 +9,22 @@ import { toast } from 'sonner';
 
 export default function HeadStudentsList() {
   const [students, setStudents] = useState<any[]>([]);
-  const [meta, setMeta] = useState<any>({ total: 0, page: 1, limit: 10, totalPages: 1 });
+  const [meta, setMeta] = useState<any>({ total: 0, page: 1, limit: 50, totalPages: 1 });
   const [loading, setLoading] = useState(false);
+  const [curators, setCurators] = useState<any[]>([]);
   
   // Filters
   const [search, setSearch] = useState('');
   const [courseYear, setCourseYear] = useState('');
   const [groupName, setGroupName] = useState('');
   const [gender, setGender] = useState('');
+  const [curatorName, setCuratorName] = useState('');
 
   const fetchStudents = async (page = 1) => {
     setLoading(true);
     try {
       const res = await api.get('/departments/head/students', {
-        params: { page, limit: meta.limit, search, courseYear, groupName, gender }
+        params: { page, limit: meta.limit, search, courseYear, groupName, gender, curatorName }
       });
       setStudents(res.data.data);
       setMeta(res.data.meta);
@@ -33,12 +35,25 @@ export default function HeadStudentsList() {
     }
   };
 
+  const fetchCurators = async () => {
+    try {
+      const res = await api.get('/admin/references');
+      setCurators(res.data.curators || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurators();
+  }, []);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchStudents(1);
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [search, courseYear, groupName, gender]);
+  }, [search, courseYear, groupName, gender, curatorName]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= meta.totalPages) {
@@ -73,11 +88,17 @@ export default function HeadStudentsList() {
             <option value="3">3 курс</option>
             <option value="4">4 курс</option>
           </select>
-          <input type="text" placeholder="Группа (напр. CS-202)" value={groupName} onChange={(e) => setGroupName(e.target.value)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent w-48" />
+          <input type="text" placeholder="Группа (напр. ИС25-1Б)" value={groupName} onChange={(e) => setGroupName(e.target.value)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent w-48" />
           <select value={gender} onChange={(e) => setGender(e.target.value)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent outline-none">
             <option value="">Любой пол</option>
             <option value="MALE">Мужской</option>
             <option value="FEMALE">Женский</option>
+          </select>
+          <select value={curatorName} onChange={(e) => setCuratorName(e.target.value)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent outline-none max-w-[200px]">
+            <option value="">Все кураторы</option>
+            {curators.map((c: any) => (
+              <option key={c.id} value={c.name}>{c.name}</option>
+            ))}
           </select>
         </div>
       </div>

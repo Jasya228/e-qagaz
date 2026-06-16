@@ -158,6 +158,7 @@ export default function DashboardLayout({
     if (user.role === 'HEAD_DEPARTMENT') {
       return [
         { name: 'Дашборд', href: '/head', icon: LayoutDashboard },
+        { name: 'Преподаватели', href: '/head/teachers', icon: Users },
         { name: 'Студенты', href: '/head/students', icon: Users },
         { name: 'Настройки', href: '/settings', icon: Settings },
       ];
