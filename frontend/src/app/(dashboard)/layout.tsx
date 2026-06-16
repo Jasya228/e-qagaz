@@ -277,7 +277,7 @@ export default function DashboardLayout({
           </div>
         </header>
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 animate-in w-full max-w-[100vw]">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 w-full max-w-[100vw]">
           {children}
         </main>
       </div>

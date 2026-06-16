@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
