@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { Users, Mail, Phone, ShieldCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function MyGroupPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     api.get('/teachers/my-group')
@@ -63,7 +65,8 @@ export default function MyGroupPage() {
                 {data.students.map((student: any) => (
                   <tr 
                     key={student.id} 
-                    className="hover:bg-white/5 transition-colors"
+                    className="hover:bg-white/5 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/my-group/${student.userId}`)}
                   >
                     <td className="px-6 py-4 flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold border border-accent/30 overflow-hidden flex-shrink-0">

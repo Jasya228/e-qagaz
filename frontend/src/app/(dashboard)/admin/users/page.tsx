@@ -70,12 +70,13 @@ export default function AdminUsersPage() {
 
   // Prevent background scroll when any modal is open
   useEffect(() => {
+    const mainEl = document.querySelector('main');
     if (isModalOpen || isResetModalOpen) {
-      document.body.style.overflow = 'hidden';
+      if (mainEl) mainEl.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      if (mainEl) mainEl.style.overflow = 'auto';
     }
-    return () => { document.body.style.overflow = 'unset'; };
+    return () => { if (mainEl) mainEl.style.overflow = 'auto'; };
   }, [isModalOpen, isResetModalOpen]);
 
   const handleBlock = async (id: string, currentlyActive: boolean) => {
