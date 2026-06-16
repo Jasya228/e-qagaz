@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     .filter((s: any) => s.groupName === groupName)
     .map((s: any) => {
       const u = db.users.find((user: any) => user.id === s.userId) || {};
+      return {
         id: s.id,
         userId: u.id,
         firstName: u.firstName,
