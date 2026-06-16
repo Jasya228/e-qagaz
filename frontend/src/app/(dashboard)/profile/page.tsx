@@ -54,25 +54,53 @@ export default function ProfilePage() {
     if (!file) return;
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      toast.loading('Обработка фото...', { id: 'upload' });
 
-      toast.loading('Загрузка фото...', { id: 'upload' });
-      const uploadRes = await fetch('/api/uploads', {
-        method: 'POST',
-        body: formData,
-      });
+      // Resize and compress image using Canvas
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;
+          const MAX_HEIGHT = 533; // 3x4 ratio
 
-      if (!uploadRes.ok) throw new Error('Ошибка загрузки');
-      const uploadData = await uploadRes.json();
-      const newAvatarUrl = uploadData.url;
+          let width = img.width;
+          let height = img.height;
 
-      await api.patch('/users/me', { avatarUrl: newAvatarUrl });
-      
-      setProfile(prev => prev ? { ...prev, avatarUrl: newAvatarUrl } : null);
-      toast.success('Фото обновлено', { id: 'upload' });
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          // Get compressed base64 (jpeg, 0.7 quality)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+          try {
+            await api.patch('/users/me', { avatarUrl: compressedBase64 });
+            setProfile(prev => prev ? { ...prev, avatarUrl: compressedBase64 } : null);
+            toast.success('Фото обновлено', { id: 'upload' });
+          } catch (err) {
+            toast.error('Не удалось сохранить фото', { id: 'upload' });
+          }
+        };
+      };
     } catch (err) {
-      toast.error('Не удалось обновить фото', { id: 'upload' });
+      toast.error('Не удалось обработать фото', { id: 'upload' });
     }
   };
 

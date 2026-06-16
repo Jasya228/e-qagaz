@@ -87,20 +87,27 @@ export default function GradesPage() {
             exit={{ opacity: 0, x: 20 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {[1, 2, 3, 4].map((course) => (
-              <motion.button
-                key={course}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleCourseSelect(course)}
-                className="glass-card p-8 flex flex-col items-center justify-center gap-4 text-center group transition-all hover:border-accent/50 hover:bg-white/10"
-              >
-                <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                  <GraduationCap className="h-8 w-8 text-accent" />
-                </div>
-                <span className="text-xl font-semibold text-white">{course} курс</span>
-              </motion.button>
-            ))}
+            {[1, 2, 3, 4].map((course) => {
+              const sem1 = course * 2 - 1;
+              const sem2 = course * 2;
+              return (
+                <motion.button
+                  key={course}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleCourseSelect(course)}
+                  className="glass-card p-8 flex flex-col items-center justify-center gap-4 text-center group transition-all hover:border-accent/50 hover:bg-white/10"
+                >
+                  <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                    <GraduationCap className="h-8 w-8 text-accent" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xl font-semibold text-white">{course} курс</span>
+                    <span className="text-sm text-gray-400 mt-1">({sem1}-{sem2} семестр)</span>
+                  </div>
+                </motion.button>
+              );
+            })}
           </motion.div>
         )}
 
