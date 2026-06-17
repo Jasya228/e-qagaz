@@ -52,10 +52,11 @@ function seedRandomData() {
 
   console.log(`Добавлено ${docsAdded} документов и ${achsAdded} достижений.`);
 
-  // 2. Создаем по 2 предмета для каждой группы + оценки
-  if (!db.subjects) db.subjects = [];
-  if (!db.lessons) db.lessons = [];
-  if (!db.totalScores) db.totalScores = [];
+  // 2. Очищаем старые тестовые данные
+  db.subjects = db.subjects?.filter(s => !s.name.includes('(1 сем)') && !s.name.includes('(2 сем)')) || [];
+  db.lessons = [];
+  db.grades = [];
+  db.totalScores = [];
 
   const groups = db.groups || [];
   const departments = db.departments || [];
@@ -65,22 +66,17 @@ function seedRandomData() {
   const advancedSubjects = ['БМ 1.1', 'ПМ 2.4', 'ОН 4.5', 'КМ 3.1', 'СМ 2.2', 'ПМ 1.2', 'ОД 3.4'];
 
   groups.forEach(group => {
-    // Найдем студентов этой группы
     const groupStudents = students.filter(s => s.groupName === group.name);
     if (groupStudents.length === 0) return;
 
-    // Определяем курс группы по первому студенту
     const courseYear = groupStudents[0].courseYear || 1;
-    // Сделаем для двух семестров этого курса (1 и 2)
     [1, 2].forEach(semester => {
-      // По 2 предмета
       for (let i = 0; i < 2; i++) {
-        let subjName = '';
-        if (courseYear === 1) {
-          subjName = basicSubjects[Math.floor(Math.random() * basicSubjects.length)] + ` (${semester} сем)`;
-        } else {
-          subjName = advancedSubjects[Math.floor(Math.random() * advancedSubjects.length)] + ` (${semester} сем)`;
-        }
+        let subjName = courseYear === 1 ? 
+          basicSubjects[Math.floor(Math.random() * basicSubjects.length)] : 
+          advancedSubjects[Math.floor(Math.random() * advancedSubjects.length)];
+        
+        subjName += ` (${semester} сем)`;
 
         const subjectId = `subj-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         
@@ -93,55 +89,67 @@ function seedRandomData() {
           semester
         });
 
-        // Создадим 3 урока для этого предмета в этой группе
         let totalScoreMap = {};
         
+        // 3 урока (случайные даты в месяце)
         for (let l = 1; l <= 3; l++) {
           const lessonId = `lesson-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-          let grades = {};
-
-          groupStudents.forEach(s => {
-            // 80% шанс получить оценку
-            if (Math.random() < 0.8) {
-              const score = 60 + Math.floor(Math.random() * 41); // 60-100
-              grades[s.userId] = score;
-              totalScoreMap[s.userId] = (totalScoreMap[s.userId] || 0) + score;
-            } else if (Math.random() < 0.2) {
-              grades[s.userId] = "НБ";
-            }
-          });
+          const day = Math.floor(Math.random() * 28) + 1;
+          const month = semester === 1 ? (Math.floor(Math.random() * 4) + 9) : (Math.floor(Math.random() * 5) + 1);
+          const dateStr = `2023-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
 
           db.lessons.push({
             id: lessonId,
             subjectId,
             groupName: group.name,
-            date: `2024-0${Math.floor(Math.random() * 5) + 1}-1${l}`,
+            date: dateStr,
             topic: `Тема урока ${l}`,
             courseYear,
-            semester,
-            grades
+            semester
+          });
+
+          // Оценки
+          groupStudents.forEach(s => {
+            if (Math.random() < 0.8) {
+              const score = 60 + Math.floor(Math.random() * 41);
+              db.grades.push({
+                id: `grade-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
+                studentId: s.userId,
+                lessonId,
+                subjectId,
+                score
+              });
+              totalScoreMap[s.userId] = (totalScoreMap[s.userId] || 0) + score;
+            } else if (Math.random() < 0.2) {
+              db.grades.push({
+                id: `grade-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
+                studentId: s.userId,
+                lessonId,
+                subjectId,
+                score: "НБ"
+              });
+            }
           });
         }
 
-        // Запишем totalScores
+        // Запишем totalScores (считаем среднее)
         groupStudents.forEach(s => {
-          const tScore = totalScoreMap[s.userId] ? Math.floor(totalScoreMap[s.userId] / 3) : null;
-          const examScore = Math.random() < 0.8 ? 60 + Math.floor(Math.random() * 41) : null;
-          
-          db.totalScores.push({
-            id: `ts-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
-            subjectId,
-            studentId: s.userId,
-            semester: semester,
-            examScore: examScore,
-            totalScore: (tScore && examScore) ? Math.floor((tScore + examScore) / 2) : (tScore || examScore || null)
-          });
+          if (totalScoreMap[s.userId]) {
+            const avg = Math.floor(totalScoreMap[s.userId] / 3);
+            db.totalScores.push({
+              id: `total-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
+              studentId: s.userId,
+              subjectId,
+              semester,
+              score: avg
+            });
+          }
         });
       }
     });
   });
 
-  console.log('Предметы, уроки и оценки успешно сгенерированы!');
+  console.log('Предметы, даты, уроки и оценки успешно сгенерированы в правильном формате!');
 
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
   console.log('База данных успешно обновлена.');
