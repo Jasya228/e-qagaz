@@ -222,7 +222,7 @@ export default function AchievementsPage() {
                 <p className="text-sm text-gray-400 line-clamp-2 mb-4">{achievement.description || 'Нет описания'}</p>
                 
                 {achievement.files.length > 0 && (
-                  <a href={(process.env.NEXT_PUBLIC_API_URL || '').replace('/api', '') + achievement.files[0].fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-gray-300 hover:text-accent transition-colors">
+                  <a href={`/api/files/${achievement.files[0].fileUrl.split('/').pop()}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-gray-300 hover:text-accent transition-colors">
                     <FileIcon className="h-4 w-4 text-accent" />
                     <span>Посмотреть файл</span>
                   </a>

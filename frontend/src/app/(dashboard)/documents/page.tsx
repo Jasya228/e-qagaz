@@ -201,7 +201,7 @@ export default function DocumentsPage() {
                 {doc.status === 'READY' && doc.fileUrl && (
                   <div className="mt-4 pt-4 border-t border-white/5 flex gap-2">
                     <a
-                      href={(process.env.NEXT_PUBLIC_API_URL || '').replace('/api', '') + doc.fileUrl}
+                      href={`/api/files/${doc.fileUrl.split('/').pop()}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium text-gray-300 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
