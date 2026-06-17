@@ -69,21 +69,25 @@ export async function POST(request: NextRequest) {
           // If empty string, delete grade if exists
           db.grades = db.grades.filter((g: any) => !(g.studentId === update.studentId && g.lessonId === lUpdate.lessonId));
         } else {
-          const score = Number(lUpdate.score);
-          if (!isNaN(score)) {
-            const existingGradeIdx = db.grades.findIndex((g: any) => g.studentId === update.studentId && g.lessonId === lUpdate.lessonId);
-            if (existingGradeIdx >= 0) {
-              db.grades[existingGradeIdx].score = score;
-            } else {
-              db.grades.push({
-                id: `grade-${Date.now()}-${Math.random()}`,
-                studentId: update.studentId,
-                lessonId: lUpdate.lessonId,
-                subjectId,
-                score,
-                createdAt: new Date().toISOString()
-              });
-            }
+          let score: any = lUpdate.score;
+          if (!isNaN(Number(score))) {
+            score = Number(score);
+          } else {
+            score = String(score).trim().toUpperCase();
+          }
+          
+          const existingGradeIdx = db.grades.findIndex((g: any) => g.studentId === update.studentId && g.lessonId === lUpdate.lessonId);
+          if (existingGradeIdx >= 0) {
+            db.grades[existingGradeIdx].score = score;
+          } else {
+            db.grades.push({
+              id: `grade-${Date.now()}-${Math.random()}`,
+              studentId: update.studentId,
+              lessonId: lUpdate.lessonId,
+              subjectId,
+              score,
+              createdAt: new Date().toISOString()
+            });
           }
         }
       });

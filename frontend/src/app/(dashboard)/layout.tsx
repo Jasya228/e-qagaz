@@ -149,8 +149,6 @@ export default function DashboardLayout({
         { name: 'Дашборд', href: '/admin', icon: LayoutDashboard },
         { name: 'Пользователи', href: '/admin/users', icon: Users },
         { name: 'Справочники', href: '/admin/references', icon: FileText },
-        { name: 'Предметы', href: '/admin/subjects', icon: FileText },
-        { name: 'Оценки', href: '/admin/lessons', icon: Award },
         { name: 'Журнал', href: '/admin/journal', icon: FileText },
         { name: 'Настройки', href: '/settings', icon: Settings },
       ];

@@ -6,12 +6,15 @@ import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminReferencesPage() {
-  const [data, setData] = useState({ groups: [], curators: [], departments: [] });
+  const [data, setData] = useState({ groups: [], curators: [], departments: [], subjects: [] });
   const [loading, setLoading] = useState(true);
 
   // Form states
   const [groupName, setGroupName] = useState('');
   const [deptName, setDeptName] = useState('');
+  const [subjName, setSubjName] = useState('');
+  const [subjCourse, setSubjCourse] = useState(1);
+  const [subjSem, setSubjSem] = useState(1);
 
   const fetchReferences = async () => {
     try {
@@ -60,7 +63,7 @@ export default function AdminReferencesPage() {
         <p className="text-gray-400 mt-1">Управление выпадающими списками системы</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* GROUPS */}
         <div className="glass-card p-6 flex flex-col h-full">
@@ -116,6 +119,54 @@ export default function AdminReferencesPage() {
               </div>
             ))}
             {data.departments.length === 0 && <p className="text-sm text-gray-500">Нет добавленных отделений</p>}
+          </div>
+        </div>
+
+        {/* SUBJECTS */}
+        <div className="glass-card p-6 flex flex-col h-full md:col-span-2 lg:col-span-1">
+          <h3 className="text-lg font-bold text-white mb-4">Предметы</h3>
+          <div className="flex flex-col gap-2 mb-4">
+            <div className="flex gap-2">
+              <select value={subjCourse} onChange={e => setSubjCourse(Number(e.target.value))} className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent">
+                <option value={1}>1 курс</option>
+                <option value={2}>2 курс</option>
+                <option value={3}>3 курс</option>
+                <option value={4}>4 курс</option>
+              </select>
+              <select value={subjSem} onChange={e => setSubjSem(Number(e.target.value))} className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent">
+                <option value={1}>1 семестр</option>
+                <option value={2}>2 семестр</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Название предмета" 
+                value={subjName} 
+                onChange={e => setSubjName(e.target.value)} 
+                className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent"
+              />
+              <button 
+                onClick={() => handleAdd('subjects', { name: subjName, courseYear: subjCourse, semester: subjSem }, () => setSubjName(''))} 
+                className="p-2 bg-accent text-white rounded-xl hover:bg-blue-600 transition-colors"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto max-h-80 space-y-2 custom-scrollbar pr-2">
+            {data.subjects?.map((s: any) => (
+              <div key={s.id} className="flex justify-between items-center p-3 bg-white/5 border border-white/5 rounded-xl">
+                <div>
+                  <span className="text-gray-300 text-sm block">{s.name}</span>
+                  <span className="text-gray-500 text-xs block">{s.courseYear} курс, {s.semester} сем.</span>
+                </div>
+                <button onClick={() => handleDelete('subjects', s.id)} className="text-gray-500 hover:text-red-400 transition-colors">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            {(!data.subjects || data.subjects.length === 0) && <p className="text-sm text-gray-500">Нет добавленных предметов</p>}
           </div>
         </div>
 

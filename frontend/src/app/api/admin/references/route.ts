@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     groups: db.groups || [],
     curators: teacherCurators,
-    departments: db.departments || []
+    departments: db.departments || [],
+    subjects: db.subjects || []
   });
 }
 
@@ -39,6 +40,10 @@ export async function POST(request: NextRequest) {
     if (type === 'groups') db.groups.push(newItem);
     else if (type === 'curators') db.curators.push(newItem);
     else if (type === 'departments') db.departments.push(newItem);
+    else if (type === 'subjects') {
+      if (!db.subjects) db.subjects = [];
+      db.subjects.push(newItem);
+    }
     else return NextResponse.json({ message: 'Invalid type' }, { status: 400 });
 
     await writeDB(db);
@@ -63,6 +68,7 @@ export async function DELETE(request: NextRequest) {
   if (type === 'groups') db.groups = db.groups.filter((i: any) => i.id !== id);
   else if (type === 'curators') db.curators = db.curators.filter((i: any) => i.id !== id);
   else if (type === 'departments') db.departments = db.departments.filter((i: any) => i.id !== id);
+  else if (type === 'subjects') db.subjects = db.subjects.filter((i: any) => i.id !== id);
   else return NextResponse.json({ message: 'Invalid type' }, { status: 400 });
 
   await writeDB(db);

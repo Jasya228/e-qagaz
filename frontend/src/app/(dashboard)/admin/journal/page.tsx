@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { Save, Users, Calendar } from 'lucide-react';
+import { Save, Users, Calendar, Plus, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminJournalPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [addingLesson, setAddingLesson] = useState(false);
   
   // Selection
   const [courseYear, setCourseYear] = useState<number>(1);
@@ -105,11 +106,56 @@ export default function AdminJournalPage() {
       });
 
       toast.success('Журнал сохранен!');
+      fetchJournal(); // refresh
     } catch (err) {
       toast.error('Ошибка сохранения журнала');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleAddLesson = async () => {
+    const dateStr = prompt("Введите дату занятия (ГГГГ-ММ-ДД):", new Date().toISOString().split('T')[0]);
+    if (!dateStr) return;
+    
+    setAddingLesson(true);
+    try {
+      await api.post('/admin/lessons', {
+        courseYear,
+        semester,
+        groupName,
+        subjectId,
+        date: new Date(dateStr).toISOString(),
+        departmentId: students[0]?.departmentId || '' // using first student's department if needed
+      });
+      toast.success('Занятие добавлено');
+      fetchJournal();
+    } catch (err) {
+      toast.error('Ошибка добавления занятия');
+    } finally {
+      setAddingLesson(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["ФИО Студента", ...lessons.map(l => new Date(l.date).toLocaleDateString('ru-RU')), "Итоговая"];
+    const rows = students.map(s => {
+      const row = [`${s.user?.lastName || ''} ${s.user?.firstName || ''}`.trim()];
+      lessons.forEach(l => {
+        row.push(gradesState[s.userId]?.[l.id] || '-');
+      });
+      row.push(gradesState[s.userId]?.totalScore || '0');
+      return row.join(';'); // semicolon for excel compatibility
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(';'), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Journal_${groupName}_course${courseYear}_sem${semester}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -149,7 +195,7 @@ export default function AdminJournalPage() {
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">Предмет</label>
-            <select value={subjectId} onChange={e => setSubjectId(e.target.value)} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white">
+            <select value={subjectId} onChange={e => setSubjectId(e.target.value)} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white disabled:opacity-50" disabled={!groupName}>
               <option value="">Выберите предмет...</option>
               {availableSubjects.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -159,40 +205,49 @@ export default function AdminJournalPage() {
         {/* JOURNAL GRID */}
         {groupName && subjectId ? (
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Users className="h-5 w-5 text-accent" /> Журнал группы {groupName}
               </h3>
-              <button 
-                onClick={handleSave} 
-                disabled={saving || students.length === 0}
-                className="flex items-center gap-2 px-6 py-2 bg-accent text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-lg shadow-blue-500/20"
-              >
-                <Save className="h-4 w-4" /> {saving ? 'Сохранение...' : 'Сохранить изменения'}
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
+                >
+                  <Download className="h-4 w-4" /> Скачать CSV
+                </button>
+                <button 
+                  onClick={handleSave} 
+                  disabled={saving || students.length === 0}
+                  className="flex items-center gap-2 px-6 py-2 bg-accent text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-lg shadow-blue-500/20"
+                >
+                  <Save className="h-4 w-4" /> {saving ? 'Сохранение...' : 'Сохранить изменения'}
+                </button>
+              </div>
             </div>
 
             {loading ? (
               <div className="text-center py-12 text-gray-400">Загрузка журнала...</div>
             ) : students.length === 0 ? (
               <div className="text-center py-12 text-gray-500">В этой группе нет студентов</div>
-            ) : lessons.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 border border-white/5 rounded-xl bg-white/5">
-                Для этой группы и предмета еще не назначены уроки.<br/>
-                Перейдите в раздел "Оценки" (Назначение уроков), чтобы создать даты занятий.
-              </div>
             ) : (
-              <div className="glass-card overflow-x-auto">
+              <div className="glass-card overflow-x-auto relative">
                 <table className="w-full text-sm text-left text-gray-400 min-w-[800px] whitespace-nowrap">
                   <thead className="bg-white/5 text-gray-300 border-b border-white/10">
                     <tr>
-                      <th className="px-4 py-3 sticky left-0 bg-[#0F172A] z-10 min-w-[200px]">ФИО Студента</th>
+                      <th className="px-4 py-3 sticky left-0 bg-[#0F172A] z-20 min-w-[200px]">ФИО Студента</th>
                       {lessons.map(l => (
                         <th key={l.id} className="px-2 py-3 text-center border-l border-white/5">
                           <div className="text-xs text-gray-500 font-normal">Урок</div>
                           <div className="font-medium text-white">{new Date(l.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}</div>
                         </th>
                       ))}
+                      {/* ADD LESSON BUTTON IN HEADER */}
+                      <th className="px-2 py-3 text-center border-l border-white/5 bg-white/5 w-16">
+                         <button onClick={handleAddLesson} disabled={addingLesson} className="p-1.5 bg-accent/20 text-accent rounded hover:bg-accent hover:text-white transition-colors mx-auto block" title="Добавить дату занятия">
+                           <Plus className="h-4 w-4" />
+                         </button>
+                      </th>
                       <th className="px-4 py-3 text-center border-l border-white/10 bg-accent/5 text-accent min-w-[120px]">
                         Итоговая
                       </th>
@@ -209,15 +264,17 @@ export default function AdminJournalPage() {
                         {lessons.map(l => (
                           <td key={l.id} className="px-2 py-2 text-center border-l border-white/5">
                             <input 
-                              type="number" 
-                              min="0" max="100"
+                              type="text" 
                               value={gradesState[s.userId]?.[l.id] || ''}
                               onChange={(e) => handleGradeChange(s.userId, l.id, e.target.value)}
                               placeholder="-"
-                              className="w-14 px-1 py-1.5 text-center bg-white/5 border border-white/10 rounded text-white focus:ring-1 focus:ring-accent focus:bg-white/10 transition-colors"
+                              className="w-14 px-1 py-1.5 text-center bg-white/5 border border-white/10 rounded text-white focus:ring-1 focus:ring-accent focus:bg-white/10 transition-colors uppercase"
                             />
                           </td>
                         ))}
+                        
+                        {/* EMPTY CELL UNDER PLUS BUTTON */}
+                        <td className="px-2 py-2 border-l border-white/5 bg-white/5"></td>
 
                         {/* TOTAL SCORE COLUMN */}
                         <td className="px-4 py-2 text-center border-l border-white/10 bg-accent/5">
@@ -238,7 +295,7 @@ export default function AdminJournalPage() {
           </div>
         ) : (
            <div className="text-center py-16 text-gray-500">
-             Выберите курс, семестр, группу и предмет для отображения журнала
+             Сначала выберите курс, семестр и группу, а затем предмет для отображения журнала.
            </div>
         )}
       </div>

@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       courseYear: data.courseYear,
       semester: data.semester,
       departmentId: data.departmentId,
+      groupName: data.groupName,
       subjectId: data.subjectId,
       date: data.date,
       createdAt: new Date().toISOString()

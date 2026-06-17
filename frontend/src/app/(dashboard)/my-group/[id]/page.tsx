@@ -168,7 +168,7 @@ export default function MyGroupStudentDetailsPage() {
                               {g ? (
                                 <div className="flex flex-col items-center justify-center p-1 rounded hover:bg-white/5">
                                   <span className="text-[10px] text-gray-500 mb-1 leading-none">{new Date(g.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}</span>
-                                  <span className={`font-bold text-sm leading-none ${g.score >= 90 ? 'text-green-400' : g.score >= 70 ? 'text-blue-400' : g.score >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{g.score}</span>
+                                  <span className={`font-bold text-sm leading-none ${g.score === 'НБ' ? 'text-red-500' : g.score >= 90 ? 'text-green-400' : g.score >= 70 ? 'text-blue-400' : g.score >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{g.score}</span>
                                 </div>
                               ) : (
                                 <span className="text-gray-600/50 text-xs">-</span>
