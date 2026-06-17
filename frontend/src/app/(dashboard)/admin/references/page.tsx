@@ -134,8 +134,8 @@ export default function AdminReferencesPage() {
                 <option value={4}>4 курс</option>
               </select>
               <select value={subjSem} onChange={e => setSubjSem(Number(e.target.value))} className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent">
-                <option value={1}>1 семестр</option>
-                <option value={2}>2 семестр</option>
+                <option value={1}>{subjCourse * 2 - 1} семестр</option>
+                <option value={2}>{subjCourse * 2} семестр</option>
               </select>
             </div>
             <div className="flex gap-2">

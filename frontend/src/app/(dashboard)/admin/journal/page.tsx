@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { Save, Users, Calendar, Plus, Download } from 'lucide-react';
+import { Save, Users, Calendar, Plus, Download, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as XLSX from 'xlsx';
 
 export default function AdminJournalPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [addingLesson, setAddingLesson] = useState(false);
   
   // Selection
   const [courseYear, setCourseYear] = useState<number>(1);
@@ -26,6 +27,11 @@ export default function AdminJournalPage() {
   
   // gradesState shape: { [studentId]: { [lessonId]: string, totalScore: string } }
   const [gradesState, setGradesState] = useState<Record<string, any>>({});
+
+  // Modal State
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [newLessonDate, setNewLessonDate] = useState(new Date().toISOString().split('T')[0]);
+  const [addingLesson, setAddingLesson] = useState(false);
 
   useEffect(() => {
     api.get('/admin/references').then(res => setGroups(res.data.groups || [])).catch(() => {});
@@ -95,7 +101,7 @@ export default function AdminJournalPage() {
         totalScore: gradesState[studentId].totalScore,
         lessons: lessons.map(l => ({
           lessonId: l.id,
-          score: gradesState[studentId][l.id]
+          score: gradesState[studentId]?.[l.id] ?? ''
         }))
       }));
 
@@ -106,7 +112,6 @@ export default function AdminJournalPage() {
       });
 
       toast.success('Журнал сохранен!');
-      fetchJournal(); // refresh
     } catch (err) {
       toast.error('Ошибка сохранения журнала');
     } finally {
@@ -114,22 +119,41 @@ export default function AdminJournalPage() {
     }
   };
 
-  const handleAddLesson = async () => {
-    const dateStr = prompt("Введите дату занятия (ГГГГ-ММ-ДД):", new Date().toISOString().split('T')[0]);
-    if (!dateStr) return;
+  const handleAddLessonSubmit = async () => {
+    if (!newLessonDate) {
+      toast.error("Выберите дату");
+      return;
+    }
     
     setAddingLesson(true);
     try {
-      await api.post('/admin/lessons', {
+      const res = await api.post('/admin/lessons', {
         courseYear,
         semester,
         groupName,
         subjectId,
-        date: new Date(dateStr).toISOString(),
-        departmentId: students[0]?.departmentId || '' // using first student's department if needed
+        date: new Date(newLessonDate).toISOString(),
+        departmentId: students[0]?.departmentId || ''
       });
+      
+      const newLesson = res.data;
+      
+      // Update local state without losing unsaved grades
+      setLessons(prev => {
+        const updated = [...prev, newLesson];
+        return updated.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      });
+      
+      setGradesState(prev => {
+        const newState = { ...prev };
+        Object.keys(newState).forEach(studentId => {
+          newState[studentId][newLesson.id] = '';
+        });
+        return newState;
+      });
+
       toast.success('Занятие добавлено');
-      fetchJournal();
+      setIsDateModalOpen(false);
     } catch (err) {
       toast.error('Ошибка добавления занятия');
     } finally {
@@ -137,25 +161,26 @@ export default function AdminJournalPage() {
     }
   };
 
-  const handleExportCSV = () => {
+  const handleExportExcel = () => {
     const headers = ["ФИО Студента", ...lessons.map(l => new Date(l.date).toLocaleDateString('ru-RU')), "Итоговая"];
     const rows = students.map(s => {
-      const row = [`${s.user?.lastName || ''} ${s.user?.firstName || ''}`.trim()];
+      const rowData: any = {};
+      rowData["ФИО Студента"] = `${s.user?.lastName || ''} ${s.user?.firstName || ''}`.trim();
+      
       lessons.forEach(l => {
-        row.push(gradesState[s.userId]?.[l.id] || '-');
+        const dateKey = new Date(l.date).toLocaleDateString('ru-RU');
+        rowData[dateKey] = gradesState[s.userId]?.[l.id] || '-';
       });
-      row.push(gradesState[s.userId]?.totalScore || '0');
-      return row.join(';'); // semicolon for excel compatibility
+      
+      rowData["Итоговая"] = gradesState[s.userId]?.totalScore || '0';
+      return rowData;
     });
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(';'), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Journal_${groupName}_course${courseYear}_sem${semester}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.json_to_sheet(rows, { header: headers });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Журнал");
+    
+    XLSX.writeFile(workbook, `Journal_${groupName}_course${courseYear}_sem${semester}.xlsx`);
   };
 
   return (
@@ -182,8 +207,8 @@ export default function AdminJournalPage() {
           <div>
             <label className="block text-sm text-gray-400 mb-1">Семестр</label>
             <select value={semester} onChange={e => {setSemester(Number(e.target.value)); setSubjectId('');}} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white">
-              <option value={1}>1 семестр</option>
-              <option value={2}>2 семестр</option>
+              <option value={1}>{courseYear * 2 - 1} семестр</option>
+              <option value={2}>{courseYear * 2} семестр</option>
             </select>
           </div>
           <div>
@@ -211,10 +236,10 @@ export default function AdminJournalPage() {
               </h3>
               <div className="flex items-center gap-3">
                 <button 
-                  onClick={handleExportCSV}
+                  onClick={handleExportExcel}
                   className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
                 >
-                  <Download className="h-4 w-4" /> Скачать CSV
+                  <Download className="h-4 w-4" /> Скачать Excel
                 </button>
                 <button 
                   onClick={handleSave} 
@@ -244,7 +269,7 @@ export default function AdminJournalPage() {
                       ))}
                       {/* ADD LESSON BUTTON IN HEADER */}
                       <th className="px-2 py-3 text-center border-l border-white/5 bg-white/5 w-16">
-                         <button onClick={handleAddLesson} disabled={addingLesson} className="p-1.5 bg-accent/20 text-accent rounded hover:bg-accent hover:text-white transition-colors mx-auto block" title="Добавить дату занятия">
+                         <button onClick={() => setIsDateModalOpen(true)} className="p-1.5 bg-accent/20 text-accent rounded hover:bg-accent hover:text-white transition-colors mx-auto block" title="Добавить дату занятия">
                            <Plus className="h-4 w-4" />
                          </button>
                       </th>
@@ -299,6 +324,62 @@ export default function AdminJournalPage() {
            </div>
         )}
       </div>
+
+      {/* Date Picker Modal */}
+      <AnimatePresence>
+        {isDateModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsDateModalOpen(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-sm glass-card p-6 overflow-hidden z-10"
+            >
+              <button 
+                onClick={() => setIsDateModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-accent/20 rounded-full text-accent">
+                  <Calendar className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Новое занятие</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Выберите дату проведения</label>
+                  <input 
+                    type="date" 
+                    value={newLessonDate}
+                    onChange={(e) => setNewLessonDate(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-accent focus:bg-white/10 transition-colors"
+                  />
+                </div>
+                
+                <button
+                  onClick={handleAddLessonSubmit}
+                  disabled={addingLesson}
+                  className="w-full py-3 bg-accent text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
+                >
+                  <Plus className="h-5 w-5" /> {addingLesson ? 'Добавление...' : 'Создать колонку'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

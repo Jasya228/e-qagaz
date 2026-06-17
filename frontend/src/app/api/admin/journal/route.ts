@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
 
       // 2. Update daily lesson grades
       update.lessons.forEach((lUpdate: any) => {
-        if (lUpdate.score === '') {
-          // If empty string, delete grade if exists
+        if (lUpdate.score === '' || lUpdate.score === undefined || lUpdate.score === null) {
+          // If empty string or undefined, delete grade if exists
           db.grades = db.grades.filter((g: any) => !(g.studentId === update.studentId && g.lessonId === lUpdate.lessonId));
         } else {
           let score: any = lUpdate.score;
