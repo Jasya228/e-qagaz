@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Download, Eye, Clock, CheckCircle, AlertCircle, Plus, X, UploadCloud, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/auth.store';
 import { toast } from 'sonner';
 
 interface Document {
@@ -100,16 +101,22 @@ export default function DocumentsPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const uploadRes = await api.post('/uploads', formData, {
-        onUploadProgress: (e) => {
-          setUploadProgress(Math.round((e.loaded * 100) / (e.total || 1)));
-        },
+      const token = useAuthStore.getState().accessToken;
+      const fetchRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/uploads`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
       });
+      if (!fetchRes.ok) {
+        const errText = await fetchRes.text();
+        throw new Error(errText);
+      }
+      const fileData = await fetchRes.json();
 
       await api.post('/documents', {
         title,
         type,
-        fileUrl: uploadRes.data.url,
+        fileUrl: fileData.url,
       });
 
       toast.success('Документ загружен');

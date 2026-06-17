@@ -97,14 +97,17 @@ export default function AchievementsPage() {
       // 1. Upload file
       const formData = new FormData();
       formData.append('file', file);
-      const uploadRes = await api.post('/uploads', formData, {
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-          setUploadProgress(percentCompleted);
-        },
+      const token = useAuthStore.getState().accessToken;
+      const fetchRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/uploads`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
       });
-
-      const fileData = uploadRes.data;
+      if (!fetchRes.ok) {
+        const errText = await fetchRes.text();
+        throw new Error(errText);
+      }
+      const fileData = await fetchRes.json();
 
       // 2. Create achievement record
       await api.post('/achievements', {
