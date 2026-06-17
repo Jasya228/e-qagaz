@@ -124,10 +124,8 @@ export default function StudentDetailsPage() {
             {(() => {
               const cYear = student.selectedCourse || 1;
               const sem = student.selectedSemester || 1;
-              const filteredTotal = student.totalScores?.filter((t:any) => t.semester === sem) || [];
-              const subjectIds = filteredTotal.map((t:any) => t.subjectId);
               
-              const relevantSubjects = student.subjects?.filter((s:any) => subjectIds.includes(s.id) || (s.courseYear === cYear && s.semester === sem)) || [];
+              const relevantSubjects = student.subjects?.filter((s:any) => s.courseYear === cYear && s.semester === sem) || [];
               
               if (relevantSubjects.length === 0) return <p className="text-gray-500 py-8 text-center">В этом семестре нет оценок</p>;
 

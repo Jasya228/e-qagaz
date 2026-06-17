@@ -16,6 +16,7 @@ export default function GradesPage() {
   const [step, setStep] = useState<'course' | 'table'>('course');
   const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
+  const [absoluteSemester, setAbsoluteSemester] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [search, setSearch] = useState('');
@@ -45,11 +46,12 @@ export default function GradesPage() {
     setIsModalOpen(true);
   };
 
-  const handleSemesterSelect = (semester: number) => {
-    setSelectedSemester(semester);
+  const handleSemesterSelect = (relativeSem: number, absoluteSem: number) => {
+    setSelectedSemester(relativeSem);
+    setAbsoluteSemester(absoluteSem);
     setIsModalOpen(false);
     setStep('table');
-    fetchGrades(selectedCourse!, semester, search);
+    fetchGrades(selectedCourse!, relativeSem, search);
   };
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function GradesPage() {
           >
             <div className="flex flex-col sm:flex-row justify-between gap-4">
               <div className="inline-flex items-center px-4 py-2 rounded-xl bg-accent/20 text-accent border border-accent/30 font-medium">
-                {selectedCourse} курс, {selectedSemester} семестр
+                {selectedCourse} курс, {absoluteSemester} семестр
               </div>
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -243,13 +245,13 @@ export default function GradesPage() {
                   return (
                     <>
                       <button
-                        onClick={() => handleSemesterSelect(s1)}
+                        onClick={() => handleSemesterSelect(1, s1)}
                         className="w-full glass-button py-4 px-4 rounded-xl text-left text-white font-medium group hover:pl-6 transition-all"
                       >
                         <span className="text-accent font-bold text-lg mr-2">{s1}</span> Семестр
                       </button>
                       <button
-                        onClick={() => handleSemesterSelect(s2)}
+                        onClick={() => handleSemesterSelect(2, s2)}
                         className="w-full glass-button py-4 px-4 rounded-xl text-left text-white font-medium group hover:pl-6 transition-all"
                       >
                         <span className="text-accent font-bold text-lg mr-2">{s2}</span> Семестр
