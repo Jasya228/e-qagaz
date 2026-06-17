@@ -114,8 +114,8 @@ export default function StudentDetailsPage() {
                 onChange={e => setStudent({...student, selectedSemester: Number(e.target.value)})}
                 className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white"
               >
-                <option value={1}>1 семестр</option>
-                <option value={2}>2 семестр</option>
+                <option value={1}>{((student.selectedCourse || 1) - 1) * 2 + 1} семестр</option>
+                <option value={2}>{((student.selectedCourse || 1) - 1) * 2 + 2} семестр</option>
               </select>
             </div>
           </div>
