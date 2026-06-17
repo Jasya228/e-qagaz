@@ -43,8 +43,8 @@ export default function AchievementsPage() {
       const endpoint = isStudent ? '/achievements/my' : '/achievements/pending';
       const res = await api.get(endpoint);
       setAchievements(res.data);
-    } catch (err) {
-      toast.error('Ошибка загрузки достижений');
+    } catch (err: any) {
+      toast.error(`Ошибка загрузки: ${err?.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
@@ -153,9 +153,9 @@ export default function AchievementsPage() {
       await api.delete(`/achievements/${id}`);
       toast.success('Достижение удалено');
       setAchievements(achievements.filter(a => a.id !== id));
-    } catch (err) {
-      toast.error('Ошибка при удалении');
-    }
+    } catch (err: any) {
+      toast.error(`Ошибка загрузки: ${err?.response?.data?.message || err.message}`);
+    } finally { }
   };
 
   return (

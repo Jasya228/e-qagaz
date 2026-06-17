@@ -117,8 +117,8 @@ export default function DocumentsPage() {
       setFile(null);
       setTitle('');
       fetchDocuments();
-    } catch (err) {
-      toast.error('Ошибка загрузки');
+    } catch (err: any) {
+      toast.error(`Ошибка загрузки: ${err?.response?.data?.message || err.message}`);
     } finally {
       setUploading(false);
     }

@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Upload Error:', error);
-    return NextResponse.json({ message: 'Upload processing failed' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ message: `Upload processing failed: ${msg}` }, { status: 500 });
   }
 }
