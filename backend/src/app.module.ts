@@ -39,6 +39,10 @@ import { NotificationsService } from './notifications/notifications.service';
     UploadsModule,
     LogsModule,
     AdminModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
   controllers: [AppController, NotificationsController],
   providers: [AppService, NotificationsService],
