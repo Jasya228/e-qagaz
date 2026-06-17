@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { Search, ChevronLeft, ChevronRight, User, ShieldCheck, FileText } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 export default function HeadTeachersList() {
@@ -70,6 +71,7 @@ export default function HeadTeachersList() {
                 <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs">Должность</th>
                 <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs">Кураторство</th>
                 <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs">Статус</th>
+                <th className="px-6 py-4 font-medium text-right uppercase tracking-wider text-xs">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -84,7 +86,7 @@ export default function HeadTeachersList() {
                 ))
               ) : teachers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-gray-500">Преподаватели не найдены.</td>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">Преподаватели не найдены.</td>
                 </tr>
               ) : (
                 teachers.map((teacher) => (
@@ -114,6 +116,14 @@ export default function HeadTeachersList() {
                       <span className={`px-2 py-1 rounded text-xs ${teacher.isActive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                         {teacher.isActive ? 'Активен' : 'Заблокирован'}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link 
+                        href={`/head/teachers/${teacher.id}`} 
+                        className="inline-flex items-center px-4 py-2 bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 hover:text-green-400 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)] text-white rounded-xl text-xs font-semibold transition-all duration-300"
+                      >
+                        Профиль
+                      </Link>
                     </td>
                   </tr>
                 ))
