@@ -98,7 +98,6 @@ export default function AchievementsPage() {
       const formData = new FormData();
       formData.append('file', file);
       const uploadRes = await api.post('/uploads', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
           setUploadProgress(percentCompleted);

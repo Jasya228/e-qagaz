@@ -101,7 +101,6 @@ export default function DocumentsPage() {
       const formData = new FormData();
       formData.append('file', file);
       const uploadRes = await api.post('/uploads', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
           setUploadProgress(Math.round((e.loaded * 100) / (e.total || 1)));
         },
